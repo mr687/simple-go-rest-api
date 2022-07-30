@@ -6,12 +6,21 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"gitlab.com/mr687/privy-be-test-go/config"
 )
 
 // Main function
 func main() {
 	// Load env file
 	LoadEnvironment()
+
+	dbConn := config.NewConnection()
+
+	// Close database connection when program exits
+	defer config.CloseConnection(dbConn)
+
+	// Run auto migrate
+	config.DBAutoMigrate(dbConn)
 
 	router := gin.Default()
 
