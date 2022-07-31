@@ -23,6 +23,12 @@ func (s *Server) InitializeRoutes() {
 		}
 
 		// User Balance Routes
+		balance := api.Group("/balance", middleware.GeoIpMiddleware())
+		{
+			balance.GET("/current", s.GetBalance)
+			balance.POST("/topup", s.AddBalance)
+			// balance.POST("/send", s.SendBalance)
+		}
 	}
 
 	// Otherwise, just show Not Found 404
