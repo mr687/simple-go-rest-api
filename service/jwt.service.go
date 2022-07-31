@@ -69,7 +69,7 @@ func ParseToken(c *gin.Context) (*jwt.Token, error) {
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(GetSecretKey()), nil
 	})
@@ -83,7 +83,7 @@ func ParseToken(c *gin.Context) (*jwt.Token, error) {
 	}
 
 	if !token.Valid {
-		err := errors.New("Token is invalid")
+		err := errors.New("token is invalid")
 		return nil, err
 	}
 
@@ -92,6 +92,11 @@ func ParseToken(c *gin.Context) (*jwt.Token, error) {
 
 func GetTokenId(c *gin.Context) (uint64, error) {
 	token, _ := ParseToken(c)
+
+	if token == nil {
+		err := errors.New("Token is empty")
+		return 0, err
+	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || !token.Valid {
@@ -110,22 +115,26 @@ func GetToken(c *gin.Context) (string, error) {
 	authHeader := c.GetHeader("Authorization")
 
 	if len(authHeader) == 0 {
-		err := errors.New("Authorization header is empty")
+		err := errors.New("authorization header is empty")
 		return "", err
 	}
 
 	fields := strings.Fields(authHeader)
 	if len(fields) < 2 {
-		err := errors.New("Authorization header is invalid format")
+		err := errors.New("authorization header is invalid format")
 		return "", err
 	}
 
 	authType := strings.ToLower(fields[0])
 	if authType != "bearer" {
-		err := errors.New("Authorization header is unsupported")
+		err := errors.New("authorization header is unsupported")
 		return "", err
 	}
 
 	token := fields[1]
+	if len(token) == 0 {
+		err := errors.New("token is empty")
+		return "", err
+	}
 	return token, nil
 }
