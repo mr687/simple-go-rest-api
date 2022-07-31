@@ -43,6 +43,7 @@ func main() {
 		authApi := apiV1.Group("/auth")
 		{
 			authApi.POST("/register", authController.Register)
+			authApi.POST("/login", authController.Login)
 		}
 	}
 	router.NoRoute(func(ctx *gin.Context) {
