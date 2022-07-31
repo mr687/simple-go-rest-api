@@ -47,7 +47,7 @@ func ServerError(c *gin.Context, data interface{}) {
 }
 
 func MakeResponse(c *gin.Context, status bool, message string, statusCode int, data interface{}) {
-	if !status {
+	if !status && data != nil {
 		splittedErrors := strings.Split(fmt.Sprint(data), "\n")
 		data = splittedErrors
 	}

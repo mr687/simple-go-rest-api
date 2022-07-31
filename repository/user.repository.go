@@ -38,6 +38,20 @@ func (repo *userRepository) Insert(user *entity.User) (*entity.User, error) {
 	return user, nil
 }
 
+func (repo *userRepository) Save(user *entity.User) error {
+	err := user.BeforeInsert()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = repo.db.Save(&user).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (repo *userRepository) FindByID(id uint64) (*entity.User, error) {
 	var user *entity.User
 	err := repo.db.Where("id = ?", id).First(&user).Error

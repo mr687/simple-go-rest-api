@@ -8,13 +8,6 @@ import (
 	"gitlab.com/mr687/privy-be-test-go/service"
 )
 
-func JSONMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Set("Content-Type", "application/json")
-		c.Next()
-	}
-}
-
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		err := service.VerifyToken(c)

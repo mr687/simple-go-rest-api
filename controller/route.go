@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"gitlab.com/mr687/privy-be-test-go/middleware"
 	"gitlab.com/mr687/privy-be-test-go/response"
 )
 
@@ -17,7 +18,8 @@ func (s *Server) InitializeRoutes() {
 		{
 			auth.POST("/register", s.Register)
 			auth.POST("/login", s.Login)
-			auth.POST("/logout", s.Logout)
+			auth.POST("/logout", middleware.AuthMiddleware(), s.Logout)
+			auth.PUT("/reset-password", middleware.AuthMiddleware(), s.ResetPassword)
 		}
 
 		// User Balance Routes

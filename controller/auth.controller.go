@@ -84,3 +84,40 @@ func (s *Server) Logout(c *gin.Context) {
 	// Return a success response
 	response.Ok(c, "Logged out successfully", nil)
 }
+
+func (s *Server) ResetPassword(c *gin.Context) {
+	userId, err := service.GetTokenId(c)
+	if err != nil {
+		response.Unauthorized(c)
+		return
+	}
+
+	repo := repository.NewUserRepository(s.DB)
+	user, err := repo.FindByID(userId)
+	if err != nil {
+		response.Unauthorized(c)
+		return
+	}
+
+	var request dto.ResetPasswordRequest
+
+	// Binding and validation
+	if err := c.ShouldBind(&request); err != nil {
+		response.ValidationError(c, err)
+		return
+	}
+
+	if !helper.ValidateHash(request.OldPassword, user.Password) {
+		response.ValidationError(c, errors.New("wrong old password"))
+		return
+	}
+
+	user.Password = request.NewPassword
+	err = repo.Save(user)
+	if err != nil {
+		response.ServerError(c, err.Error())
+		return
+	}
+
+	response.Ok(c, "Password changed", nil)
+}
