@@ -2,6 +2,7 @@ package repository
 
 import (
 	"gitlab.com/mr687/privy-be-test-go/entity"
+	"gitlab.com/mr687/privy-be-test-go/helper"
 	"gorm.io/gorm"
 )
 
@@ -22,6 +23,14 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 }
 
 func (repo *userRepository) InsertUser(newUser *entity.User) (*entity.User, error) {
+	hashedPassword, err := helper.Hash(newUser.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	// Set hashed password
+	newUser.Password = hashedPassword
+
 	if err := repo.db.Create(newUser).Error; err != nil {
 		return nil, err
 	}
