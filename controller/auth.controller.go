@@ -87,7 +87,7 @@ func (s *Server) Logout(c *gin.Context) {
 
 func (s *Server) ResetPassword(c *gin.Context) {
 	userId, err := service.GetTokenId(c)
-	if err != nil {
+	if err != nil || userId == 0 {
 		response.Unauthorized(c)
 		return
 	}
