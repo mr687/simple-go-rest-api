@@ -1,34 +1,20 @@
 package service
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 )
 
-type JwtService interface {
-	GenerateToken(userId string) string
-	ValidateToken(token string) (*jwt.Token, error)
-}
-
 type jwtCustomClaims struct {
-	UserId string `json:"userId"`
+	UserId uint64 `json:"user_id"`
 	jwt.StandardClaims
-}
-
-type jwtService struct {
-	secretKey string
-	issuer    string
-}
-
-func NewJwtService() JwtService {
-	return &jwtService{
-		issuer:    "appgo",
-		secretKey: GetSecretKey(),
-	}
 }
 
 func GetSecretKey() string {
@@ -39,36 +25,107 @@ func GetSecretKey() string {
 	return secretKey
 }
 
-func (j *jwtService) GenerateToken(userId string) string {
+func GenerateToken(userId uint64) (string, int64) {
 	// Define expire time for 1 month
 	today := time.Now()
-	expiresAt := today.AddDate(0, 1, 0).Unix()
+	expiresAt := today.Add(time.Minute * 30).Unix() // Token expires after 30 mins
 
 	claims := &jwtCustomClaims{
 		userId,
 		jwt.StandardClaims{
 			ExpiresAt: expiresAt,
-			Issuer:    j.issuer,
+			Issuer:    "somethinghere",
 			IssuedAt:  today.Unix(),
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedToken, err := token.SignedString([]byte(j.secretKey))
-
+	signedToken, err := token.SignedString([]byte(GetSecretKey()))
 	if err != nil {
-		log.Fatalf("Failed generate token %v", err)
+		return "", 0
 	}
 
-	return signedToken
+	return signedToken, expiresAt
 }
 
-func (j *jwtService) ValidateToken(token string) (*jwt.Token, error) {
-	return jwt.Parse(token, func(_t *jwt.Token) (interface{}, error) {
-		if _, ok := _t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", _t.Header["alg"])
-		}
+func VerifyToken(c *gin.Context) error {
+	token, err := ParseToken(c)
+	if err != nil {
+		return err
+	}
 
-		return []byte(j.secretKey), nil
+	if claims, ok := token.Claims.(jwtCustomClaims); ok {
+		fmt.Println(claims)
+	}
+
+	return nil
+}
+
+func ParseToken(c *gin.Context) (*jwt.Token, error) {
+	tokenString, err := GetToken(c)
+	if err != nil {
+		return nil, err
+	}
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(GetSecretKey()), nil
 	})
+
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			err := errors.New("invalid signature")
+			return nil, err
+		}
+		return nil, err
+	}
+
+	if !token.Valid {
+		err := errors.New("Token is invalid")
+		return nil, err
+	}
+
+	return token, nil
+}
+
+func GetTokenId(c *gin.Context) (uint64, error) {
+	token, _ := ParseToken(c)
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return 0, nil
+	}
+
+	userId, err := strconv.ParseUint(fmt.Sprintf("%v", claims["user_id"]), 10, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	return uint64(userId), nil
+}
+
+func GetToken(c *gin.Context) (string, error) {
+	authHeader := c.GetHeader("Authorization")
+
+	if len(authHeader) == 0 {
+		err := errors.New("Authorization header is empty")
+		return "", err
+	}
+
+	fields := strings.Fields(authHeader)
+	if len(fields) < 2 {
+		err := errors.New("Authorization header is invalid format")
+		return "", err
+	}
+
+	authType := strings.ToLower(fields[0])
+	if authType != "bearer" {
+		err := errors.New("Authorization header is unsupported")
+		return "", err
+	}
+
+	token := fields[1]
+	return token, nil
 }

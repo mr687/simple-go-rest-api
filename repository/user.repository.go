@@ -1,46 +1,65 @@
 package repository
 
 import (
+	"log"
+
 	"gitlab.com/mr687/privy-be-test-go/entity"
-	"gitlab.com/mr687/privy-be-test-go/helper"
 	"gorm.io/gorm"
 )
 
 // Define contract what's this repository can do
 type UserRepository interface {
-	InsertUser(user *entity.User) (*entity.User, error)
+	Insert() (*entity.User, error)
 	FindByEmail(email string) (*entity.User, error)
+	FindByID(id uint64) (*entity.User, error)
+	IsDuplicateEmail() bool
 }
 
 type userRepository struct {
 	db *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) UserRepository {
-	return &userRepository{
-		db: db,
-	}
+func NewUserRepository(db *gorm.DB) *userRepository {
+	return &userRepository{db}
 }
 
-func (repo *userRepository) InsertUser(newUser *entity.User) (*entity.User, error) {
-	hashedPassword, err := helper.Hash(newUser.Password)
+func (repo *userRepository) Insert(user *entity.User) (*entity.User, error) {
+	// Doing something before insert
+	err := user.BeforeInsert()
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
 
-	// Set hashed password
-	newUser.Password = hashedPassword
-
-	if err := repo.db.Create(newUser).Error; err != nil {
-		return nil, err
+	err = repo.db.Create(&user).Error
+	if err != nil {
+		return user, err
 	}
-	return newUser, nil
+
+	return user, nil
+}
+
+func (repo *userRepository) FindByID(id uint64) (*entity.User, error) {
+	var user *entity.User
+	err := repo.db.Where("id = ?", id).First(&user).Error
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
 }
 
 func (repo *userRepository) FindByEmail(email string) (*entity.User, error) {
 	var user *entity.User
-	if err := repo.db.Where("email = ?", email).Take(&user).Error; err != nil {
-		return nil, err
+	err := repo.db.Where("email = ?", email).First(&user).Error
+	if err != nil {
+		return user, err
 	}
+
 	return user, nil
+}
+
+func (repo *userRepository) IsDuplicateEmail(email string) bool {
+	var user *entity.User
+	err := repo.db.Where("email = ?", email).First(&user).Error
+	return err == nil
 }
