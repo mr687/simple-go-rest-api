@@ -7,6 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"gitlab.com/mr687/privy-be-test-go/config"
+	"gitlab.com/mr687/privy-be-test-go/controller"
+	"gitlab.com/mr687/privy-be-test-go/repository"
+	"gitlab.com/mr687/privy-be-test-go/service"
 )
 
 // Main function
@@ -24,20 +27,29 @@ func main() {
 
 	router := gin.Default()
 
+	// Factory for repository
+	userRepository := repository.NewUserRepository(dbConn)
+
+	// Factory for service
+	authService := service.NewAuthService(userRepository)
+	jwtService := service.NewJwtService()
+
+	// Factory for controller
+	authController := controller.NewAuthController(authService, jwtService)
+
+	// Register routes
 	apiV1 := router.Group("/api/v1")
 	{
-		apiV1.GET("/", func(ctx *gin.Context) {
-			ctx.JSON(200, gin.H{
-				"message": "Hello World!",
-			})
-		})
+		authApi := apiV1.Group("/auth")
+		{
+			authApi.POST("/register", authController.Register)
+		}
 	}
-
 	router.NoRoute(func(ctx *gin.Context) {
 		ctx.AbortWithStatus(404)
 	})
 
-	// Define port
+	// Define port or default port if None
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
