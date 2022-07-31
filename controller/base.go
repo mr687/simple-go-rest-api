@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gitlab.com/mr687/privy-be-test-go/config"
+	"gitlab.com/mr687/privy-be-test-go/entity"
 	"gitlab.com/mr687/privy-be-test-go/middleware"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -38,7 +39,13 @@ func (s *Server) Initialize(c config.DatabaseConfig) {
 		fmt.Println("Connected to database")
 	}
 
-	// s.DB.AutoMigrate() // Database migration
+	s.DB.AutoMigrate(
+		&entity.User{},
+		&entity.UserBalance{},
+		&entity.UserBalanceHistory{},
+		&entity.BankBalance{},
+		&entity.BankBalanceHistory{},
+	) // Database migration
 
 	s.Router = gin.New()
 	s.Router.Use(gin.Recovery(), middleware.LoggerMiddleware())
