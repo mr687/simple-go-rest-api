@@ -33,7 +33,7 @@ func (s *Server) InitializeRoutes() {
 		{
 			balance.GET("/current", s.GetBalance)
 			balance.POST("/topup", s.AddBalance)
-			// balance.POST("/send", s.SendBalance)
+			balance.POST("/send", s.SendBalance)
 		}
 	}
 

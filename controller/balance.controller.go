@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"errors"
+
 	"github.com/gin-gonic/gin"
 	"gitlab.com/mr687/privy-be-test-go/dto"
 	"gitlab.com/mr687/privy-be-test-go/entity"
@@ -65,4 +67,69 @@ func (s *Server) AddBalance(c *gin.Context) {
 	}
 
 	response.Ok(c, "Add balance successfully", nil)
+}
+
+func (s *Server) SendBalance(c *gin.Context) {
+	var request dto.SendBalanceRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		response.ValidationError(c, err)
+		return
+	}
+
+	repo := repository.NewBalanceRepository(s.DB)
+	userRepo := repository.NewUserRepository(s.DB)
+
+	userId, _ := service.GetTokenId(c)
+	if userId == 0 {
+		response.Unauthorized(c)
+		return
+	}
+
+	// 1. Check if user has enough balance
+	// - Get current balance
+	senderBalance, err := repo.GetCurrentBalance(userId)
+	if err != nil {
+		// - If not found, it's means user has no balance
+		response.BadRequest(c, "Not enough balance")
+		return
+	}
+	// - then check if current balance is enough
+	if senderBalance.BalanceAchieve < request.Amount {
+		response.BadRequest(c, "Not enough balance")
+		return
+	}
+
+	// 2. Check if recipient user exists
+	// - Get recipient user
+	recipient, err := userRepo.FindByUsernameOrEmail(request.Recipient)
+	if err != nil {
+		response.ValidationError(c, errors.New("recipient user not found"))
+	}
+
+	// 3. Check if recipient user is not the same as sender
+	// - Check if sender user id is the same as recipient user
+	if recipient.Id == userId {
+		response.BadRequest(c, "Recipient user is the same as sender")
+		return
+	}
+
+	// 4. Send Balance
+	// Fo Sender:
+	// - Subtract balance
+	senderBalance.Balance = -request.Amount
+	senderBalance.BalanceAchieve -= request.Amount
+	// - Save balance
+	repo.SaveBalance(c, senderBalance)
+
+	// For Recipient:
+	// - Get current balance
+	recipientBalance, _ := repo.GetCurrentBalance(recipient.Id)
+	// - Add balance
+	recipientBalance.Balance = request.Amount
+	recipientBalance.BalanceAchieve += request.Amount
+	// - Save balance
+	repo.SaveBalance(c, recipientBalance)
+
+	// 5. Return response
+	response.Ok(c, "Send balance successfully", nil)
 }

@@ -30,6 +30,10 @@ func Conflict(c *gin.Context, message string) {
 	MakeResponse(c, false, message, http.StatusConflict, nil)
 }
 
+func BadRequest(c *gin.Context, message string) {
+	MakeResponse(c, false, message, http.StatusBadRequest, nil)
+}
+
 func NotFound(c *gin.Context) {
 	MakeResponse(c, false, "Not Found", http.StatusNotFound, nil)
 }
