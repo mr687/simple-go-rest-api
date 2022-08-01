@@ -12,7 +12,7 @@ func GeoIpMiddleware() gin.HandlerFunc {
 		realIp := service.GetRealIp(c)
 		geoip, err := service.GetGeoInfo(realIp)
 		if err != nil {
-			c.Set("geoip", &service.GeoIp{})
+			c.Set("geoip", &service.GeoIp{Ip: realIp}) // set default geoip if the source is not found
 		}
 
 		fmt.Println(geoip)
