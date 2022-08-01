@@ -28,22 +28,14 @@ func (repo *balanceRepository) GetCurrentBalance(userId uint64) (*entity.UserBal
 }
 
 func (repo *balanceRepository) SaveBalance(c *gin.Context, newBalance *entity.UserBalance) error {
-	tx := repo.db.Begin()
-
-	if err := tx.Save(&newBalance).Error; err != nil {
-		tx.Rollback()
+	if err := repo.db.Save(&newBalance).Error; err != nil {
+		fmt.Println(err)
 		return err
 	}
-
-	if err := repo.SaveBalanceHistory(tx, c, newBalance); err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	return tx.Commit().Error
+	return nil
 }
 
-func (repo *balanceRepository) SaveBalanceHistory(tx *gorm.DB, c *gin.Context, newBalance *entity.UserBalance) error {
+func (repo *balanceRepository) SaveBalanceHistory(c *gin.Context, newBalance *entity.UserBalance, historyType entity.HistoryType, activity string) error {
 	geoInfo := c.MustGet("geoip").(*service.GeoIp)
 
 	balanceHistory := entity.UserBalanceHistory{
@@ -53,9 +45,9 @@ func (repo *balanceRepository) SaveBalanceHistory(tx *gorm.DB, c *gin.Context, n
 		Ip:            geoInfo.Ip,
 		Location:      fmt.Sprintf("%s, %s", geoInfo.City, geoInfo.CountryName),
 		UserAgent:     c.GetHeader("User-Agent"),
-		Type:          "debit",
+		Type:          historyType,
+		Activtiy:      activity,
 		Author:        "System",
-		Activtiy:      "Add balance",
 	}
-	return tx.Save(&balanceHistory).Error
+	return repo.db.Save(&balanceHistory).Error
 }

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"gitlab.com/mr687/privy-be-test-go/dto"
@@ -52,6 +53,7 @@ func (s *Server) AddBalance(c *gin.Context) {
 	var newBalance *entity.UserBalance
 	currentBalance, err := repo.GetCurrentBalance(userId)
 	if err != nil {
+		// create new balance
 		newBalance = entity.EmptyUserBalance(userId)
 	} else {
 		newBalance = currentBalance
@@ -60,7 +62,15 @@ func (s *Server) AddBalance(c *gin.Context) {
 	newBalance.Balance = request.Amount
 	newBalance.BalanceAchieve += request.Amount
 
+	// save UserBalance
 	err = repo.SaveBalance(c, newBalance)
+	if err != nil {
+		response.ServerError(c, err)
+		return
+	}
+
+	// save UserBalanceHistory
+	err = repo.SaveBalanceHistory(c, newBalance, "debit", fmt.Sprintf("Add balance %v", request.Amount))
 	if err != nil {
 		response.ServerError(c, err)
 		return
@@ -84,6 +94,7 @@ func (s *Server) SendBalance(c *gin.Context) {
 		response.Unauthorized(c)
 		return
 	}
+	sender, _ := userRepo.FindByID(userId)
 
 	// 1. Check if user has enough balance
 	// - Get current balance
@@ -120,6 +131,8 @@ func (s *Server) SendBalance(c *gin.Context) {
 	senderBalance.BalanceAchieve -= request.Amount
 	// - Save balance
 	repo.SaveBalance(c, senderBalance)
+	// - Save balance history
+	repo.SaveBalanceHistory(c, senderBalance, "kredit", fmt.Sprintf("Send %v to %s", request.Amount, recipient.Username))
 
 	// For Recipient:
 	// - Get current balance
@@ -129,6 +142,8 @@ func (s *Server) SendBalance(c *gin.Context) {
 	recipientBalance.BalanceAchieve += request.Amount
 	// - Save balance
 	repo.SaveBalance(c, recipientBalance)
+	// - Save balance history
+	repo.SaveBalanceHistory(c, recipientBalance, "debit", fmt.Sprintf("Receive %v from %s", request.Amount, sender.Username))
 
 	// 5. Return response
 	response.Ok(c, "Send balance successfully", nil)
