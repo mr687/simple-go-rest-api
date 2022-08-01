@@ -36,6 +36,9 @@ func GetGeoInfo(addr string) (*GeoIp, error) {
 
 	geo := &GeoIp{}
 
+	// get ip info from freegeoip.live
+	// The 3rd party service may die or be unavailable at any time.
+	// For the improvement of performance, we could use the cache to store the geo info
 	url := fmt.Sprintf("https://freegeoip.live/json/%s", addr)
 	res, err := http.Get(url)
 	if err != nil {
