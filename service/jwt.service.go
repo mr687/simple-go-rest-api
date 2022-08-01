@@ -94,7 +94,7 @@ func GetTokenId(c *gin.Context) (uint64, error) {
 	token, _ := ParseToken(c)
 
 	if token == nil {
-		err := errors.New("Token is empty")
+		err := errors.New("token is empty")
 		return 0, err
 	}
 
