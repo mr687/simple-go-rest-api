@@ -19,7 +19,13 @@ func (s *Server) InitializeRoutes() {
 			auth.POST("/register", s.Register)
 			auth.POST("/login", s.Login)
 			auth.POST("/logout", middleware.AuthMiddleware(), s.Logout)
+		}
+
+		// User Routes
+		user := api.Group("/user", middleware.AuthMiddleware())
+		{
 			auth.PUT("/reset-password", middleware.AuthMiddleware(), s.ResetPassword)
+			user.PUT("/change-username-email", s.ChangeUsernameEmail)
 		}
 
 		// User Balance Routes
