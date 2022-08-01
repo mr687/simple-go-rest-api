@@ -1,6 +1,6 @@
 # REST API - PRIVY BE TEST - Golang
 
-A simple REST API for PRIVY BE TEST using [gin-gonic](https://github.com/gin-gonic/gin) for the web framework and [gorm](https://gorm.io) for the database ORM.
+A simple REST API for PRIVY BE TEST using [gin-gonic](https://github.com/gin-gonic/gin) for the web framework and [gorm](https://gorm.io) for the database ORM. This project is using Repository Pattern to separate the database and the business logic.
 
 The project includes the following features:
 * RESTful API endpoint
@@ -10,6 +10,9 @@ The project includes the following features:
 * [JWT](https://jwt.io/)-based authentication
 * Database migration
 * Postman documentation and API testing
+
+Note:
+* The geoip info service is provided by [freegeoip.live](https://freegeoip.live) that may not be available when you try this project:(
 
 ## Getting Started
 Please follow [the instructions](https://golang.org/doc/install) to install Go on your local machine. This project requires **Go 1.18 or higher+**.
