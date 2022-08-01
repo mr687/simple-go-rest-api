@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mashingan/smapping"
@@ -22,6 +23,9 @@ func (s *Server) Register(c *gin.Context) {
 		return
 	}
 
+	// remove whitespace from username
+	registerRequest.Username = strings.ReplaceAll(registerRequest.Username, " ", "")
+
 	newUser := &entity.User{}
 	_ = smapping.FillStruct(&newUser, smapping.MapFields(&registerRequest))
 
@@ -29,6 +33,11 @@ func (s *Server) Register(c *gin.Context) {
 
 	if repo.IsDuplicateEmail(newUser.Email) {
 		response.Conflict(c, "Email already exists")
+		return
+	}
+
+	if repo.IsDuplicateUsername(newUser.Username) {
+		response.Conflict(c, "Username already exists")
 		return
 	}
 
@@ -59,7 +68,7 @@ func (s *Server) Login(c *gin.Context) {
 	repo := repository.NewUserRepository(s.DB)
 
 	// check if user exists
-	existsUser, err := repo.FindByEmail(credential.Email)
+	existsUser, err := repo.FindByUsernameOrEmail(credential.Account)
 	if err != nil {
 		response.ValidationError(c, errors.New("user not found"))
 		return
@@ -83,41 +92,4 @@ func (s *Server) Login(c *gin.Context) {
 func (s *Server) Logout(c *gin.Context) {
 	// Return a success response
 	response.Ok(c, "Logged out successfully", nil)
-}
-
-func (s *Server) ResetPassword(c *gin.Context) {
-	userId, err := service.GetTokenId(c)
-	if err != nil || userId == 0 {
-		response.Unauthorized(c)
-		return
-	}
-
-	repo := repository.NewUserRepository(s.DB)
-	user, err := repo.FindByID(userId)
-	if err != nil {
-		response.Unauthorized(c)
-		return
-	}
-
-	var request dto.ResetPasswordRequest
-
-	// Binding and validation
-	if err := c.ShouldBind(&request); err != nil {
-		response.ValidationError(c, err)
-		return
-	}
-
-	if !helper.ValidateHash(request.OldPassword, user.Password) {
-		response.ValidationError(c, errors.New("wrong old password"))
-		return
-	}
-
-	user.Password = request.NewPassword
-	err = repo.Save(user)
-	if err != nil {
-		response.ServerError(c, err.Error())
-		return
-	}
-
-	response.Ok(c, "Password changed", nil)
 }
