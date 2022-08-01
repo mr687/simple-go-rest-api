@@ -44,11 +44,15 @@ func (s *Server) AddBalance(c *gin.Context) {
 	}
 
 	repo := repository.NewBalanceRepository(s.DB)
+	userRepo := repository.NewUserRepository(s.DB)
+	bankBalanceRepo := repository.NewBankBalanceRepository(s.DB)
+
 	userId, _ := service.GetTokenId(c)
 	if userId == 0 {
 		response.Unauthorized(c)
 		return
 	}
+	user, _ := userRepo.FindByID(userId)
 
 	var newBalance *entity.UserBalance
 	currentBalance, err := repo.GetCurrentBalance(userId)
@@ -74,6 +78,13 @@ func (s *Server) AddBalance(c *gin.Context) {
 	if err != nil {
 		response.ServerError(c, err)
 		return
+	}
+
+	// save user balance to bank balance & bank history
+	currentBankBalance := bankBalanceRepo.GetBankBalance()
+	if currentBankBalance.Enabled {
+		bankBalance, _ := bankBalanceRepo.SaveBalanceToBank(currentBankBalance, newBalance)
+		bankBalanceRepo.SaveBalanceHistory(c, bankBalance, fmt.Sprintf("Add balance %v from %s", request.Amount, user.Username))
 	}
 
 	response.Ok(c, "Add balance successfully", nil)
