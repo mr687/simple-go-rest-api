@@ -20,10 +20,10 @@ After all done, run the following commands to start the project:
 
 ```bash
 # Clone this repo
-git clone https://gitlab.com/mr687/privy-be-test.git
+git clone https://gitlab.com/mr687/privy-be-test-go.git
 
 # Go to the project directory
-cd privy-be-test
+cd privy-be-test-go
 
 # Install dependencies
 go mod init
