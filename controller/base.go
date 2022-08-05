@@ -6,9 +6,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.com/mr687/privy-be-test-go/config"
-	"gitlab.com/mr687/privy-be-test-go/entity"
-	"gitlab.com/mr687/privy-be-test-go/middleware"
+	"github.com/mr687/simple-go-rest-api/config"
+	"github.com/mr687/simple-go-rest-api/entity"
+	"github.com/mr687/simple-go-rest-api/middleware"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )

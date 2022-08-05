@@ -2,8 +2,8 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"gitlab.com/mr687/privy-be-test-go/middleware"
-	"gitlab.com/mr687/privy-be-test-go/response"
+	"github.com/mr687/simple-go-rest-api/middleware"
+	"github.com/mr687/simple-go-rest-api/response"
 )
 
 func (s *Server) InitializeRoutes() {

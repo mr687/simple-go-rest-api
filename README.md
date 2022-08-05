@@ -1,6 +1,6 @@
-# REST API - PRIVY BE TEST - Golang
+# RESTful API - Golang
 
-A simple REST API for PRIVY BE TEST using [gin-gonic](https://github.com/gin-gonic/gin) for the web framework and [gorm](https://gorm.io) for the database ORM. This project is using Repository Pattern to separate the database and the business logic.
+A simple RESTful API using [gin-gonic](https://github.com/gin-gonic/gin) for the web framework and [gorm](https://gorm.io) for the database ORM. This project is using Repository Pattern to separate the database and the business logic.
 
 The project includes the following features:
 * RESTful API endpoint
@@ -15,7 +15,7 @@ Note:
 * The geoip info service is provided by [freegeoip.live](https://freegeoip.live) that may not be available when you try this project:(
 
 ## Getting Started
-Please follow [the instructions](https://golang.org/doc/install) to install Go on your local machine. This project requires **Go 1.18 or higher+**.
+Please follow [the instructions](https://golang.org/doc/install) to install Go on your local machine. This project requires **Go 1.17 or higher+**.
 
 We also need to install [Docker](https://www.docker.com/get-started) if you want to try the project without setting your own environment.
 
@@ -23,10 +23,10 @@ After all done, run the following commands to start the project:
 
 ```bash
 # Clone this repo
-git clone https://gitlab.com/mr687/privy-be-test-go.git
+git clone https://github.com/mr687/simple-go-rest-api.git
 
 # Go to the project directory
-cd privy-be-test-go
+cd simple-go-rest-api
 
 # Install dependencies
 go mod init

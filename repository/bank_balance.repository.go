@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.com/mr687/privy-be-test-go/entity"
-	"gitlab.com/mr687/privy-be-test-go/service"
+	"github.com/mr687/simple-go-rest-api/entity"
+	"github.com/mr687/simple-go-rest-api/service"
 	"gorm.io/gorm"
 )
 

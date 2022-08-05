@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.com/mr687/privy-be-test-go/response"
-	"gitlab.com/mr687/privy-be-test-go/service"
+	"github.com/mr687/simple-go-rest-api/response"
+	"github.com/mr687/simple-go-rest-api/service"
 )
 
 func AuthMiddleware() gin.HandlerFunc {

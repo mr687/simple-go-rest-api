@@ -3,7 +3,7 @@ package repository
 import (
 	"log"
 
-	"gitlab.com/mr687/privy-be-test-go/entity"
+	"github.com/mr687/simple-go-rest-api/entity"
 	"gorm.io/gorm"
 )
 

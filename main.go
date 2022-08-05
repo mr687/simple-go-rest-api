@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"gitlab.com/mr687/privy-be-test-go/config"
-	"gitlab.com/mr687/privy-be-test-go/controller"
+	"github.com/mr687/simple-go-rest-api/config"
+	"github.com/mr687/simple-go-rest-api/controller"
 )
 
 // Main function

@@ -1,7 +1,7 @@
 package entity
 
 import (
-	"gitlab.com/mr687/privy-be-test-go/helper"
+	"github.com/mr687/simple-go-rest-api/helper"
 )
 
 // User struct is represents a users table in database

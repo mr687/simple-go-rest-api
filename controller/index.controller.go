@@ -2,7 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"gitlab.com/mr687/privy-be-test-go/response"
+	"github.com/mr687/simple-go-rest-api/response"
 )
 
 func (s *Server) Index(c *gin.Context) {

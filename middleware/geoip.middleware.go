@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.com/mr687/privy-be-test-go/service"
+	"github.com/mr687/simple-go-rest-api/service"
 )
 
 func GeoIpMiddleware() gin.HandlerFunc {

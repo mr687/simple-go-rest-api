@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.com/mr687/privy-be-test-go/dto"
-	"gitlab.com/mr687/privy-be-test-go/entity"
-	"gitlab.com/mr687/privy-be-test-go/repository"
-	"gitlab.com/mr687/privy-be-test-go/response"
-	"gitlab.com/mr687/privy-be-test-go/service"
+	"github.com/mr687/simple-go-rest-api/dto"
+	"github.com/mr687/simple-go-rest-api/entity"
+	"github.com/mr687/simple-go-rest-api/repository"
+	"github.com/mr687/simple-go-rest-api/response"
+	"github.com/mr687/simple-go-rest-api/service"
 )
 
 func (s *Server) GetBalance(c *gin.Context) {
